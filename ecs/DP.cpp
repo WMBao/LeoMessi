@@ -43,7 +43,7 @@ vector<vector<int> > Greedy_Bag(int phy_mem, int phy_CPU, vector<int> V_mem, vec
 		}
 
 	}
-	vector<pair<int, int>> map_vec(V_map.begin(), V_map.end());
+	vector<pair<int, int> > map_vec(V_map.begin(), V_map.end());
 	sort(map_vec.begin(), map_vec.end(), cmp_by_value);
 
 	int V_count = V_flaver.size();
@@ -103,7 +103,7 @@ vector<vector<int> > Greedy_Bag(int phy_mem, int phy_CPU, vector<int> V_mem, vec
 
 vector<vector<int> > DP_Bag(int phy_mem, int phy_CPU, vector<int> V_mem, vector<int> V_CPU, vector<int> V_num, bool memOrCPU)
 {
-	
+
 	vector<vector<int> > final_result;
 	phy_mem += 1;
 	phy_CPU += 1;
@@ -122,16 +122,17 @@ vector<vector<int> > DP_Bag(int phy_mem, int phy_CPU, vector<int> V_mem, vector<
 	while (V_count > 1)
 	{
 
-		int ***table = new int**[V_count];
-		for (int i = 0; i < V_count; i++)
-		{
-			table[i] = new int*[phy_CPU];
-			for (int j = 0; j < phy_CPU; j++)
-				table[i][j] = new int[phy_mem];
-		}
+		// int ***table = new int**[2];
+		// for (int i = 0; i < V_count; i++)
+		// {
+		// 	table[i] = new int*[phy_CPU];
+		// 	for (int j = 0; j < phy_CPU; j++)
+		// 		table[i][j] = new int[phy_mem];
+		// }
+		vector<vector<vector<int> > > table(2, vector<vector<int> >(phy_CPU, vector<int>(phy_mem)));
 
-		vector<vector<vector<vector<int> > > > result (V_count, vector<vector<vector<int> > >(phy_CPU, vector<vector<int> >(phy_mem)));
-		
+		vector<vector<vector<vector<int> > > > result(2, vector<vector<vector<int> > >(phy_CPU, vector<vector<int> >(phy_mem)));
+
 
 		for (int i = 0; i < V_count; i++)
 		{
@@ -139,39 +140,52 @@ vector<vector<int> > DP_Bag(int phy_mem, int phy_CPU, vector<int> V_mem, vector<
 			{
 				for (int k = 0; k < phy_mem; k++)
 				{
-					table[i][j][k] = i == 0 ? 0 : table[i - 1][j][k];
+					if (i == 0)
+					{
+						table[i][j][k] = 0;
+					}
+					else
+					{
+						table[1][j][k] = table[0][j][k];
+					}
 					if (i != 0)
-						result[i][j][k].insert(result[i][j][k].end(), result[i - 1][j][k].begin(), result[i - 1][j][k].end());
+						result[1][j][k].clear();
+						result[1][j][k].insert(result[1][j][k].end(), result[0][j][k].begin(), result[0][j][k].end());
 					if (i > 0 && j >= V_CPU[V_flaver[i - 1]] && k >= V_mem[V_flaver[i - 1]])
 					{
 						if (memOrCPU)
 						{
-							if (table[i][j][k] < table[i - 1][j - V_CPU[V_flaver[i - 1]]][k - V_mem[V_flaver[i - 1]]] + V_mem[V_flaver[i - 1]])
+							if (table[1][j][k] < table[0][j - V_CPU[V_flaver[i - 1]]][k - V_mem[V_flaver[i - 1]]] + V_mem[V_flaver[i - 1]])
 							{
-								table[i][j][k] = table[i - 1][j - V_CPU[V_flaver[i - 1]]][k - V_mem[V_flaver[i - 1]]] + V_mem[V_flaver[i - 1]];
-								result[i][j][k].clear();
-								result[i][j][k].insert(result[i][j][k].end(), result[i - 1][j - V_CPU[V_flaver[i - 1]]][k - V_mem[V_flaver[i - 1]]].begin(), result[i - 1][j - V_CPU[V_flaver[i - 1]]][k - V_mem[V_flaver[i - 1]]].end());
-								result[i][j][k].push_back(V_flaver[i - 1]);
+								table[1][j][k] = table[0][j - V_CPU[V_flaver[i - 1]]][k - V_mem[V_flaver[i - 1]]] + V_mem[V_flaver[i - 1]];
+								result[1][j][k].clear();
+								result[1][j][k].insert(result[1][j][k].end(), result[0][j - V_CPU[V_flaver[i - 1]]][k - V_mem[V_flaver[i - 1]]].begin(), result[0][j - V_CPU[V_flaver[i - 1]]][k - V_mem[V_flaver[i - 1]]].end());
+								result[1][j][k].push_back(V_flaver[i - 1]);
 							}
 						}
 						else
 						{
-							if (table[i][j][k] < table[i - 1][j - V_CPU[V_flaver[i - 1]]][k - V_mem[V_flaver[i - 1]]] + V_CPU[V_flaver[i - 1]])
+							if (table[1][j][k] < table[0][j - V_CPU[V_flaver[i - 1]]][k - V_mem[V_flaver[i - 1]]] + V_CPU[V_flaver[i - 1]])
 							{
-								table[i][j][k] = table[i - 1][j - V_CPU[V_flaver[i - 1]]][k - V_mem[V_flaver[i - 1]]] + V_CPU[V_flaver[i - 1]];
-								result[i][j][k].clear();
-								result[i][j][k].insert(result[i][j][k].end(), result[i - 1][j - V_CPU[V_flaver[i - 1]]][k - V_mem[V_flaver[i - 1]]].begin(), result[i - 1][j - V_CPU[V_flaver[i - 1]]][k - V_mem[V_flaver[i - 1]]].end());
-								result[i][j][k].push_back(V_flaver[i - 1]);
+								table[1][j][k] = table[0][j - V_CPU[V_flaver[i - 1]]][k - V_mem[V_flaver[i - 1]]] + V_CPU[V_flaver[i - 1]];
+								result[1][j][k].clear();
+								result[1][j][k].insert(result[1][j][k].end(), result[0][j - V_CPU[V_flaver[i - 1]]][k - V_mem[V_flaver[i - 1]]].begin(), result[0][j - V_CPU[V_flaver[i - 1]]][k - V_mem[V_flaver[i - 1]]].end());
+								result[1][j][k].push_back(V_flaver[i - 1]);
 							}
 						}
 					}
-
-				
 				}
+			}
+			if (i != 0)
+			{
+				table[0].clear();
+				table[0].insert(table[0].end(), table[1].begin(), table[1].end());
+				result[0].clear();
+				result[0].insert(result[0].end(), result[1].begin(), result[1].end());
 			}
 		}
 		vector<int> one_phy_res;
-		one_phy_res.insert(one_phy_res.end(), result[V_count - 1][phy_CPU - 1][phy_mem - 1].begin(), result[V_count - 1][phy_CPU - 1][phy_mem - 1].end());
+		one_phy_res.insert(one_phy_res.end(), result[1][phy_CPU - 1][phy_mem - 1].begin(), result[1][phy_CPU - 1][phy_mem - 1].end());
 
 
 		vector<int> V_num_ = V_num;
@@ -221,34 +235,36 @@ vector<vector<int> > DP_Bag(int phy_mem, int phy_CPU, vector<int> V_mem, vector<
 
 
 
-//int main()
-//{
-//	int phy_mem = 5;
-//	int phy_CPU = 5;
-//
-//	vector<int> V_mem;
-//	V_mem.push_back(2);
-//	V_mem.push_back(1);
-//
-//	vector<int> V_CPU;
-//	V_CPU.push_back(2);
-//	V_CPU.push_back(1);
-//
-//	vector<int> V_num;
-//	V_num.push_back(2);
-//	V_num.push_back(2);
-//
-//	bool memOrCPU = true;
-//
-//	vector<vector<int> > result = DP_Bag(phy_mem, phy_CPU, V_mem, V_CPU, V_num, memOrCPU);
-//	for (int num_phy_m = 0; num_phy_m < result.size(); num_phy_m++)
-//	{
-//		cout << num_phy_m << '\n';
-//		for (int num_flav = 0; num_flav < result[num_phy_m].size(); num_flav++)
-//		{
-//			cout << '\t' << result[num_phy_m][num_flav] << '\n';
-//		}
-//	}
-//	return 0;
-//}
+
+
+// int main()
+// {
+// 	int phy_mem = 5;
+// 	int phy_CPU = 5;
+
+// 	vector<int> V_mem;
+// 	V_mem.push_back(2);
+// 	V_mem.push_back(1);
+
+// 	vector<int> V_CPU;
+// 	V_CPU.push_back(2);
+// 	V_CPU.push_back(1);
+
+// 	vector<int> V_num;
+// 	V_num.push_back(2);
+// 	V_num.push_back(2);
+
+// 	bool memOrCPU = true;
+
+// 	vector<vector<int> > result = DP_Bag(phy_mem, phy_CPU, V_mem, V_CPU, V_num, memOrCPU);
+// 	for (int num_phy_m = 0; num_phy_m < result.size(); num_phy_m++)
+// 	{
+// 		cout << num_phy_m << '\n';
+// 		for (int num_flav = 0; num_flav < result[num_phy_m].size(); num_flav++)
+// 		{
+// 			cout << '\t' << result[num_phy_m][num_flav] << '\n';
+// 		}
+// 	}
+// 	return 0;
+// }
 

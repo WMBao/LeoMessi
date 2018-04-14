@@ -197,13 +197,13 @@ void predict_server(char * info[MAX_INFO_NUM], char * data[MAX_DATA_NUM], int da
         result = DP_Bag(MEM, CPU, V_MEM, V_CPU, V_num, memOrCPU);
     }
     catch (exception& e) {
-        // result = Greedy_Bag(MEM, CPU, V_MEM, V_CPU, V_num, memOrCPU);
-        vector<int> one_phy;
-        for (int i =0; i<V_num.size(); i++)
-        {
-            one_phy.push_back(1);
-        }
-        result.push_back(one_phy);
+        result = Greedy_Bag(MEM, CPU, V_MEM, V_CPU, V_num, memOrCPU);
+        // vector<int> one_phy;
+        // for (int i =0; i<V_num.size(); i++)
+        // {
+        //     one_phy.push_back(1);
+        // }
+        // result.push_back(one_phy);
     }
 
     sprintf(tmp,"%d\n", result.size());
